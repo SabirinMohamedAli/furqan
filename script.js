@@ -285,6 +285,11 @@ if (typeof window !== 'undefined' && window.supabase && SUPABASE_URL !== 'YOUR_S
 const STORAGE_KEY = 'birthdayWishes';
 const PUBLIC_STORAGE_KEY = 'furqan-birthday-wishes-public';
 
+// Notification Settings
+const NOTIFICATION_EMAIL = 'furqan.birthday@gmail.com'; // Change to your email
+const NOTIFICATION_WHATSAPP = '+252612011700'; // WhatsApp number
+const AUTO_OPEN_WHATSAPP = true; // Set to true to auto-open WhatsApp when wish is submitted
+
 // Load wishes from public cloud database (Supabase)
 async function loadWishes() {
     try {
@@ -483,6 +488,10 @@ if (wishForm) {
                 }
                 
                 console.log('✅ Wish saved to PUBLIC cloud database! Everyone can see it!');
+                
+                // Send notification via Email and WhatsApp
+                sendWishNotification(name, message, imageBase64);
+                
                 // Reload wishes to show the new one
                 await loadWishes();
             } else {
@@ -501,6 +510,9 @@ if (wishForm) {
                 
                 console.log('⚠️ Saved to localStorage (not public). Set up Supabase for public sharing!');
                 displayWishes(wishes);
+                
+                // Send notification via Email and WhatsApp
+                sendWishNotification(name, message, imageBase64);
             }
             
             // Reset form
@@ -526,14 +538,62 @@ if (wishForm) {
             submitBtn.disabled = false;
             submitBtn.innerHTML = originalText;
         }
-            
-        } catch (error) {
-            console.error('Error saving wish:', error);
-            alert('An error occurred. Please try again.');
-            submitBtn.disabled = false;
-            submitBtn.innerHTML = originalText;
-        }
     });
+}
+
+// Send notification via Email and WhatsApp when someone submits a wish
+async function sendWishNotification(name, message, image) {
+    try {
+        // Format the notification message
+        const notificationMessage = `🎉 New Birthday Wish for Princess Furqan! 🎉\n\n👤 From: ${name}\n\n💌 Message: ${message}\n\n📅 Time: ${new Date().toLocaleString()}\n\n${image ? '📷 Image attached' : ''}`;
+        
+        // WhatsApp notification - Create clickable link
+        const whatsappNumber = NOTIFICATION_WHATSAPP.replace(/[^0-9]/g, ''); // Remove non-digits
+        const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(notificationMessage)}`;
+        
+        console.log('📱 WhatsApp notification ready:', whatsappUrl);
+        
+        // Auto-open WhatsApp if enabled
+        if (AUTO_OPEN_WHATSAPP) {
+            // Open WhatsApp in new tab
+            setTimeout(() => {
+                window.open(whatsappUrl, '_blank');
+                console.log('📱 WhatsApp opened automatically!');
+            }, 1000); // Wait 1 second after form submission
+        }
+        
+        // Send via EmailJS (if configured)
+        if (typeof emailjs !== 'undefined' && emailjs.send) {
+            try {
+                const emailParams = {
+                    to_email: NOTIFICATION_EMAIL,
+                    from_name: name,
+                    message: message,
+                    date: new Date().toLocaleString(),
+                    subject: '🎉 New Birthday Wish for Princess Furqan!'
+                };
+                
+                // Send email (you need to configure EmailJS first)
+                await emailjs.send('YOUR_SERVICE_ID', 'YOUR_TEMPLATE_ID', emailParams);
+                console.log('✅ Email notification sent!');
+            } catch (emailError) {
+                console.log('EmailJS not configured. See EMAIL_WHATSAPP_SETUP.md for setup.');
+            }
+        } else {
+            // Fallback: Create mailto link
+            const emailSubject = encodeURIComponent('🎉 New Birthday Wish for Princess Furqan!');
+            const emailBody = encodeURIComponent(`New wish received!\n\nFrom: ${name}\n\nMessage: ${message}\n\nDate: ${new Date().toLocaleString()}`);
+            const mailtoLink = `mailto:${NOTIFICATION_EMAIL}?subject=${emailSubject}&body=${emailBody}`;
+            console.log('📧 Email link ready:', mailtoLink);
+        }
+        
+        // Log notification details
+        console.log('📧 Email notification:', NOTIFICATION_EMAIL);
+        console.log('📱 WhatsApp notification:', NOTIFICATION_WHATSAPP);
+        
+    } catch (error) {
+        console.error('Error sending notification:', error);
+    }
 }
 
 // Initialize wishes when DOM is ready (will be called from existing DOMContentLoaded)
