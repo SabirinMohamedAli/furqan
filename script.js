@@ -263,28 +263,81 @@ const wishesContainer = document.getElementById('wishesContainer');
 const wishImageInput = document.getElementById('wishImage');
 const fileName = document.getElementById('fileName');
 
-// Storage key for wishes
-const STORAGE_KEY = 'birthdayWishes';
+// Firebase Configuration
+// IMPORTANT: Replace these with your Firebase config!
+// Get your config from: https://console.firebase.google.com/
+const firebaseConfig = {
+    apiKey: "YOUR_API_KEY",
+    authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+    databaseURL: "https://YOUR_PROJECT_ID-default-rtdb.firebaseio.com/",
+    projectId: "YOUR_PROJECT_ID",
+    storageBucket: "YOUR_PROJECT_ID.appspot.com",
+    messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+    appId: "YOUR_APP_ID"
+};
 
-// Load wishes from localStorage on page load
+// Initialize Firebase
+let database = null;
+try {
+    if (typeof firebase !== 'undefined') {
+        firebase.initializeApp(firebaseConfig);
+        database = firebase.database();
+        console.log('Firebase initialized successfully');
+    } else {
+        console.warn('Firebase not loaded. Using localStorage fallback.');
+    }
+} catch (error) {
+    console.error('Firebase initialization error:', error);
+}
+
+// Fallback to localStorage if Firebase is not available
+const STORAGE_KEY = 'birthdayWishes';
+const USE_FIREBASE = database !== null;
+
+// Load wishes from Firebase or localStorage
 function loadWishes() {
-    try {
-        const storedWishes = localStorage.getItem(STORAGE_KEY);
-        const wishes = storedWishes ? JSON.parse(storedWishes) : [];
-        console.log('Loaded wishes from storage:', wishes.length);
-        displayWishes(wishes);
+    if (USE_FIREBASE && database) {
+        // Load from Firebase (public database)
+        const wishesRef = database.ref('wishes');
         
-        // Trigger animations for loaded wishes
-        setTimeout(() => {
-            const wishCards = document.querySelectorAll('.wish-card');
-            wishCards.forEach((card, index) => {
-                card.style.opacity = '1';
-                card.style.transform = 'translateY(0)';
-            });
-        }, 100);
-    } catch (error) {
-        console.error('Error loading wishes from storage:', error);
-        wishesContainer.innerHTML = '<p class="no-wishes">Error loading wishes. Please try refreshing the page.</p>';
+        wishesRef.on('value', (snapshot) => {
+            const data = snapshot.val();
+            const wishes = data ? Object.values(data) : [];
+            console.log('Loaded wishes from Firebase:', wishes.length);
+            displayWishes(wishes);
+            
+            // Trigger animations
+            setTimeout(() => {
+                const wishCards = document.querySelectorAll('.wish-card');
+                wishCards.forEach((card, index) => {
+                    card.style.opacity = '1';
+                    card.style.transform = 'translateY(0)';
+                });
+            }, 100);
+        }, (error) => {
+            console.error('Error loading wishes from Firebase:', error);
+            wishesContainer.innerHTML = '<p class="no-wishes">Error loading wishes. Please try refreshing the page.</p>';
+        });
+    } else {
+        // Fallback to localStorage
+        try {
+            const storedWishes = localStorage.getItem(STORAGE_KEY);
+            const wishes = storedWishes ? JSON.parse(storedWishes) : [];
+            console.log('Loaded wishes from localStorage:', wishes.length);
+            displayWishes(wishes);
+            
+            // Trigger animations
+            setTimeout(() => {
+                const wishCards = document.querySelectorAll('.wish-card');
+                wishCards.forEach((card, index) => {
+                    card.style.opacity = '1';
+                    card.style.transform = 'translateY(0)';
+                });
+            }, 100);
+        } catch (error) {
+            console.error('Error loading wishes from storage:', error);
+            wishesContainer.innerHTML = '<p class="no-wishes">Error loading wishes. Please try refreshing the page.</p>';
+        }
     }
 }
 
@@ -414,38 +467,45 @@ if (wishForm) {
                 name: name,
                 message: message,
                 image: imageBase64,
-                date: new Date().toISOString()
+                date: new Date().toISOString(),
+                id: Date.now().toString() // Unique ID
             };
             
-            // Get existing wishes from localStorage
-            let wishes = [];
-            try {
-                const storedWishes = localStorage.getItem(STORAGE_KEY);
-                wishes = storedWishes ? JSON.parse(storedWishes) : [];
-            } catch (error) {
-                console.error('Error reading from storage:', error);
-                wishes = [];
-            }
-            
-            // Add new wish
-            wishes.push(wish);
-            
-            // Save to localStorage with error handling
-            try {
-                localStorage.setItem(STORAGE_KEY, JSON.stringify(wishes));
-                console.log('Wish saved successfully. Total wishes:', wishes.length);
-            } catch (error) {
-                console.error('Error saving to storage:', error);
-                // Handle storage quota exceeded
-                if (error.name === 'QuotaExceededError') {
-                    alert('Storage limit reached. Please contact the website administrator.');
-                    return;
+            // Save to Firebase (public) or localStorage (fallback)
+            if (USE_FIREBASE && database) {
+                // Save to Firebase - everyone can see it!
+                const wishesRef = database.ref('wishes');
+                await wishesRef.push(wish);
+                console.log('Wish saved to Firebase successfully!');
+                // Wishes will automatically update via real-time listener
+            } else {
+                // Fallback to localStorage
+                let wishes = [];
+                try {
+                    const storedWishes = localStorage.getItem(STORAGE_KEY);
+                    wishes = storedWishes ? JSON.parse(storedWishes) : [];
+                } catch (error) {
+                    console.error('Error reading from storage:', error);
+                    wishes = [];
                 }
-                throw error;
+                
+                wishes.push(wish);
+                
+                try {
+                    localStorage.setItem(STORAGE_KEY, JSON.stringify(wishes));
+                    console.log('Wish saved to localStorage. Total wishes:', wishes.length);
+                    displayWishes(wishes);
+                } catch (error) {
+                    console.error('Error saving to storage:', error);
+                    if (error.name === 'QuotaExceededError') {
+                        alert('Storage limit reached. Please set up Firebase for unlimited storage.');
+                        submitBtn.disabled = false;
+                        submitBtn.innerHTML = originalText;
+                        return;
+                    }
+                    throw error;
+                }
             }
-            
-            // Display wishes
-            displayWishes(wishes);
             
             // Reset form
             wishForm.reset();
@@ -463,6 +523,13 @@ if (wishForm) {
                 // Scroll to wishes
                 wishesContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
             }, 2000);
+            
+        } catch (error) {
+            console.error('Error saving wish:', error);
+            alert('An error occurred. Please try again.');
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = originalText;
+        }
             
         } catch (error) {
             console.error('Error saving wish:', error);
