@@ -263,81 +263,76 @@ const wishesContainer = document.getElementById('wishesContainer');
 const wishImageInput = document.getElementById('wishImage');
 const fileName = document.getElementById('fileName');
 
-// Firebase Configuration
-// IMPORTANT: Replace these with your Firebase config!
-// Get your config from: https://console.firebase.google.com/
-const firebaseConfig = {
-    apiKey: "YOUR_API_KEY",
-    authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-    databaseURL: "https://YOUR_PROJECT_ID-default-rtdb.firebaseio.com/",
-    projectId: "YOUR_PROJECT_ID",
-    storageBucket: "YOUR_PROJECT_ID.appspot.com",
-    messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-    appId: "YOUR_APP_ID"
-};
+// Public Wishes Storage - Using Supabase Cloud Database
+// This makes ALL wishes visible to EVERYONE across all devices!
+// Setup: https://supabase.com (free, takes 2 minutes)
 
-// Initialize Firebase
-let database = null;
-try {
-    if (typeof firebase !== 'undefined') {
-        firebase.initializeApp(firebaseConfig);
-        database = firebase.database();
-        console.log('Firebase initialized successfully');
-    } else {
-        console.warn('Firebase not loaded. Using localStorage fallback.');
+const SUPABASE_URL = 'YOUR_SUPABASE_URL'; // Replace with your Supabase URL
+const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY'; // Replace with your anon key
+
+// Initialize Supabase
+let supabaseClient = null;
+if (typeof window !== 'undefined' && window.supabase && SUPABASE_URL !== 'YOUR_SUPABASE_URL') {
+    try {
+        supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        console.log('✅ Supabase connected - wishes are now PUBLIC!');
+    } catch (error) {
+        console.error('Supabase error:', error);
     }
-} catch (error) {
-    console.error('Firebase initialization error:', error);
 }
 
-// Fallback to localStorage if Firebase is not available
+// Fallback storage
 const STORAGE_KEY = 'birthdayWishes';
-const USE_FIREBASE = database !== null;
+const PUBLIC_STORAGE_KEY = 'furqan-birthday-wishes-public';
 
-// Load wishes from Firebase or localStorage
-function loadWishes() {
-    if (USE_FIREBASE && database) {
-        // Load from Firebase (public database)
-        const wishesRef = database.ref('wishes');
+// Load wishes from public cloud database (Supabase)
+async function loadWishes() {
+    try {
+        let wishes = [];
         
-        wishesRef.on('value', (snapshot) => {
-            const data = snapshot.val();
-            const wishes = data ? Object.values(data) : [];
-            console.log('Loaded wishes from Firebase:', wishes.length);
-            displayWishes(wishes);
-            
-            // Trigger animations
-            setTimeout(() => {
-                const wishCards = document.querySelectorAll('.wish-card');
-                wishCards.forEach((card, index) => {
-                    card.style.opacity = '1';
-                    card.style.transform = 'translateY(0)';
-                });
-            }, 100);
-        }, (error) => {
-            console.error('Error loading wishes from Firebase:', error);
-            wishesContainer.innerHTML = '<p class="no-wishes">Error loading wishes. Please try refreshing the page.</p>';
-        });
-    } else {
-        // Fallback to localStorage
-        try {
-            const storedWishes = localStorage.getItem(STORAGE_KEY);
-            const wishes = storedWishes ? JSON.parse(storedWishes) : [];
-            console.log('Loaded wishes from localStorage:', wishes.length);
-            displayWishes(wishes);
-            
-            // Trigger animations
-            setTimeout(() => {
-                const wishCards = document.querySelectorAll('.wish-card');
-                wishCards.forEach((card, index) => {
-                    card.style.opacity = '1';
-                    card.style.transform = 'translateY(0)';
-                });
-            }, 100);
-        } catch (error) {
-            console.error('Error loading wishes from storage:', error);
-            wishesContainer.innerHTML = '<p class="no-wishes">Error loading wishes. Please try refreshing the page.</p>';
+        // Try Supabase first (public cloud database)
+        if (supabaseClient) {
+            try {
+                const { data, error } = await supabaseClient
+                    .from('wishes')
+                    .select('*')
+                    .order('date', { ascending: false });
+                
+                if (!error && data) {
+                    wishes = data;
+                    console.log('✅ Loaded', wishes.length, 'wishes from PUBLIC cloud database!');
+                    console.log('🌍 Everyone can see all wishes now!');
+                } else if (error) {
+                    console.log('Supabase table not created yet. See setup guide.');
+                }
+            } catch (error) {
+                console.log('Supabase error:', error);
+            }
         }
+        
+        // Fallback to localStorage if Supabase not set up
+        if (wishes.length === 0) {
+            const sharedWishes = localStorage.getItem(PUBLIC_STORAGE_KEY);
+            if (sharedWishes) {
+                wishes = JSON.parse(sharedWishes);
+                console.log('⚠️ Using localStorage (not public). Set up Supabase for public sharing!');
+            }
+        }
+        
+        displayWishes(wishes);
+        
+        // Trigger animations
+        setTimeout(() => {
+            const wishCards = document.querySelectorAll('.wish-card');
+            wishCards.forEach((card, index) => {
+                card.style.opacity = '1';
+                card.style.transform = 'translateY(0)';
+            });
+        }, 100);
+        
+    } catch (error) {
+        console.error('Error loading wishes:', error);
+        wishesContainer.innerHTML = '<p class="no-wishes">Error loading wishes. Please try refreshing the page.</p>';
     }
 }
 
@@ -471,40 +466,41 @@ if (wishForm) {
                 id: Date.now().toString() // Unique ID
             };
             
-            // Save to Firebase (public) or localStorage (fallback)
-            if (USE_FIREBASE && database) {
-                // Save to Firebase - everyone can see it!
-                const wishesRef = database.ref('wishes');
-                await wishesRef.push(wish);
-                console.log('Wish saved to Firebase successfully!');
-                // Wishes will automatically update via real-time listener
+            // Save to public cloud database (Supabase) - EVERYONE can see it!
+            if (supabaseClient) {
+                // Save to Supabase cloud database
+                const { data, error } = await supabaseClient
+                    .from('wishes')
+                    .insert([wish])
+                    .select();
+                
+                if (error) {
+                    console.error('Supabase save error:', error);
+                    alert('Error saving wish. Make sure Supabase table is set up correctly.');
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = originalText;
+                    return;
+                }
+                
+                console.log('✅ Wish saved to PUBLIC cloud database! Everyone can see it!');
+                // Reload wishes to show the new one
+                await loadWishes();
             } else {
-                // Fallback to localStorage
+                // Fallback to localStorage (not public, but works)
                 let wishes = [];
                 try {
-                    const storedWishes = localStorage.getItem(STORAGE_KEY);
-                    wishes = storedWishes ? JSON.parse(storedWishes) : [];
+                    const sharedWishes = localStorage.getItem(PUBLIC_STORAGE_KEY);
+                    wishes = sharedWishes ? JSON.parse(sharedWishes) : [];
                 } catch (error) {
-                    console.error('Error reading from storage:', error);
                     wishes = [];
                 }
                 
                 wishes.push(wish);
+                localStorage.setItem(PUBLIC_STORAGE_KEY, JSON.stringify(wishes));
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(wishes));
                 
-                try {
-                    localStorage.setItem(STORAGE_KEY, JSON.stringify(wishes));
-                    console.log('Wish saved to localStorage. Total wishes:', wishes.length);
-                    displayWishes(wishes);
-                } catch (error) {
-                    console.error('Error saving to storage:', error);
-                    if (error.name === 'QuotaExceededError') {
-                        alert('Storage limit reached. Please set up Firebase for unlimited storage.');
-                        submitBtn.disabled = false;
-                        submitBtn.innerHTML = originalText;
-                        return;
-                    }
-                    throw error;
-                }
+                console.log('⚠️ Saved to localStorage (not public). Set up Supabase for public sharing!');
+                displayWishes(wishes);
             }
             
             // Reset form
