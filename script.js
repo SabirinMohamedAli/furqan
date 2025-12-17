@@ -172,8 +172,8 @@ const observer = new IntersectionObserver((entries) => {
 
 // Observe gallery and video items with enhanced animations
 document.addEventListener('DOMContentLoaded', () => {
-    // Load wishes when DOM is ready
-    loadWishes();
+    // Animate wish cards
+    animateWishCards();
     
     // Initialize gallery lightbox
     initGalleryLightbox();
@@ -257,41 +257,32 @@ function createFloatingEmojis() {
     }
 }
 
-// Birthday Wishes Functionality
-const wishForm = document.getElementById('wishForm');
-const wishesContainer = document.getElementById('wishesContainer');
-const wishImageInput = document.getElementById('wishImage');
-const fileName = document.getElementById('fileName');
+// Special Wishes Section - No form needed, beautiful pre-written wishes displayed
 
-// Public Wishes Storage - Using Supabase Cloud Database
-// This makes ALL wishes visible to EVERYONE across all devices!
-// Setup: https://supabase.com (free, takes 2 minutes)
-
-const SUPABASE_URL = 'YOUR_SUPABASE_URL'; // Replace with your Supabase URL
-const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY'; // Replace with your anon key
-
-// Initialize Supabase
-let supabaseClient = null;
-if (typeof window !== 'undefined' && window.supabase && SUPABASE_URL !== 'YOUR_SUPABASE_URL') {
-    try {
-        supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-        console.log('✅ Supabase connected - wishes are now PUBLIC!');
-    } catch (error) {
-        console.error('Supabase error:', error);
+// Animate Sabirin's wish card on scroll
+function animateWishCards() {
+    const wishCard = document.querySelector('.sabirin-wish-card');
+    
+    if (wishCard) {
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        });
+        
+        observer.observe(wishCard);
     }
 }
 
-// Fallback storage
-const STORAGE_KEY = 'birthdayWishes';
-const PUBLIC_STORAGE_KEY = 'furqan-birthday-wishes-public';
-
-// Notification Settings
-const NOTIFICATION_EMAIL = 'furqan.birthday@gmail.com'; // Change to your email
-const NOTIFICATION_WHATSAPP = '+252612011700'; // WhatsApp number
-const AUTO_OPEN_WHATSAPP = true; // Set to true to auto-open WhatsApp when wish is submitted
-
-// Load wishes from public cloud database (Supabase)
-async function loadWishes() {
+// OLD CODE - REMOVED (form functionality)
+// The following code was removed as we no longer need the form:
+async function loadWishes_OLD() {
     try {
         let wishes = [];
         
@@ -596,11 +587,11 @@ async function sendWishNotification(name, message, image) {
     }
 }
 
-// Initialize wishes when DOM is ready (will be called from existing DOMContentLoaded)
+// Initialize wish card animations when DOM is ready
 if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', loadWishes);
+    document.addEventListener('DOMContentLoaded', animateWishCards);
 } else {
-    loadWishes();
+    animateWishCards();
 }
 
 // Enhanced parallax effect for hero section
