@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Happy Birthday Furqaan 🎉💖</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Hero Section -->
+    <section class="hero" id="hero">
+        <div class="animated-background">
+            <div class="particles"></div>
+            <div class="animated-emojis"></div>
+        </div>
+        <div class="hero-content">
+            <h1 class="animated-title">
+                <span class="line">Happy Birthday</span>
+                <span class="line name">Furqaan</span>
+                <span class="line emoji">🎉💖</span>
+            </h1>
+            <div class="hero-birthday-info">
+                <span class="birthday-month">December Girl</span>
+                <span class="birthday-age">18</span>
+            </div>
+            <p class="hero-subtitle">Wishing you a day filled with endless joy, love, and beautiful memories</p>
+            <div class="hero-love-text">
+                <span class="love-word">Cutie</span>
+                <span class="love-word">Princess</span>
+                <span class="love-word">Beautiful</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- Photo Gallery Section -->
+    <section class="gallery-section" id="gallery">
+        <div class="container">
+            <h2 class="section-title">Beautiful Moments</h2>
+            <p class="section-subtitle">Capturing memories that last forever</p>
+            <div class="gallery-grid">
+                <div class="gallery-item" data-image="assets/11.jpg">
+                    <img src="assets/11.jpg" alt="Beautiful moment" loading="lazy">
+                    <div class="gallery-overlay">
+                        <span class="zoom-icon">🔍</span>
+                    </div>
+                </div>
+                <div class="gallery-item" data-image="assets/2.jpg">
+                    <img src="assets/2.jpg" alt="Beautiful moment" loading="lazy">
+                    <div class="gallery-overlay">
+                        <span class="zoom-icon">🔍</span>
+                    </div>
+                </div>
+                <div class="gallery-item" data-image="assets/4.jpg">
+                    <img src="assets/4.jpg" alt="Beautiful moment" loading="lazy">
+                    <div class="gallery-overlay">
+                        <span class="zoom-icon">🔍</span>
+                    </div>
+                </div>
+                <div class="gallery-item" data-image="assets/5.jpg">
+                    <img src="assets/5.jpg" alt="Beautiful moment" loading="lazy">
+                    <div class="gallery-overlay">
+                        <span class="zoom-icon">🔍</span>
+                    </div>
+                </div>
+                <div class="gallery-item" data-image="assets/9.jpg">
+                    <img src="assets/9.jpg" alt="Beautiful moment" loading="lazy">
+                    <div class="gallery-overlay">
+                        <span class="zoom-icon">🔍</span>
+                    </div>
+                </div>
+                <div class="gallery-item" data-image="assets/10.jpg">
+                    <img src="assets/10.jpg" alt="Beautiful moment" loading="lazy">
+                    <div class="gallery-overlay">
+                        <span class="zoom-icon">🔍</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Video Memories Section -->
+    <section class="video-section" id="videos">
+        <div class="container">
+            <h2 class="section-title">Video Memories</h2>
+            <p class="section-subtitle">Cherished moments captured in time</p>
+            <div class="video-grid">
+                <div class="video-card">
+                    <div class="video-wrapper">
+                        <video class="video-thumbnail" preload="metadata" muted>
+                            <source src="assets/3.mp4" type="video/mp4">
+                        </video>
+                        <button class="play-button" aria-label="Play video">
+                            <svg width="60" height="60" viewBox="0 0 60 60" fill="none">
+                                <circle cx="30" cy="30" r="30" fill="rgba(255, 255, 255, 0.9)"/>
+                                <path d="M24 20L40 30L24 40V20Z" fill="#d63384"/>
+                            </svg>
+                        </button>
+                    </div>
+                    <div class="video-caption">Special Memory #1</div>
+                </div>
+                <div class="video-card">
+                    <div class="video-wrapper">
+                        <video class="video-thumbnail" preload="metadata" muted>
+                            <source src="assets/6.mp4" type="video/mp4">
+                        </video>
+                        <button class="play-button" aria-label="Play video">
+                            <svg width="60" height="60" viewBox="0 0 60 60" fill="none">
+                                <circle cx="30" cy="30" r="30" fill="rgba(255, 255, 255, 0.9)"/>
+                                <path d="M24 20L40 30L24 40V20Z" fill="#d63384"/>
+                            </svg>
+                        </button>
+                    </div>
+                    <div class="video-caption">Special Memory #2</div>
+                </div>
+                <div class="video-card">
+                    <div class="video-wrapper">
+                        <video class="video-thumbnail" preload="metadata" muted>
+                            <source src="assets/7.mp4" type="video/mp4">
+                        </video>
+                        <button class="play-button" aria-label="Play video">
+                            <svg width="60" height="60" viewBox="0 0 60 60" fill="none">
+                                <circle cx="30" cy="30" r="30" fill="rgba(255, 255, 255, 0.9)"/>
+                                <path d="M24 20L40 30L24 40V20Z" fill="#d63384"/>
+                            </svg>
+                        </button>
+                    </div>
+                    <div class="video-caption">Special Memory #3</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Lightbox Modal -->
+    <div class="lightbox" id="lightbox">
+        <button class="lightbox-close" aria-label="Close lightbox">&times;</button>
+        <button class="lightbox-prev" aria-label="Previous image">‹</button>
+        <button class="lightbox-next" aria-label="Next image">›</button>
+        <div class="lightbox-content">
+            <img src="" alt="Gallery image" id="lightbox-image">
+        </div>
+    </div>
+
+    <!-- Surprise Message Section -->
+    <section class="surprise-section" id="surprise">
+        <div class="container">
+            <div class="surprise-content">
+                <div class="surprise-icon">🎁</div>
+                <h2 class="surprise-title">A Special Message For You</h2>
+                <div class="surprise-message">
+                    <p class="surprise-greeting">My dearest Furqaan 🤍✨</p>
+                    <p class="surprise-personal">You are more than just my sister — you are my princess, my comfort, and one of the most precious gifts Allah has given me. Your smile brings warmth, your words bring peace, and your presence makes everything brighter.</p>
+                    <p class="surprise-prayer">On your special day, I pray that Allah surrounds you with His mercy, fills your heart with happiness, and guides you toward a future full of success and light. May every step you take be blessed, and may every dream you hold come true in the most beautiful way.</p>
+                    <p class="surprise-personal">Never forget how loved, valued, and special you are. I will always be here for you, proud of you, and cheering for you — today, tomorrow, and always.</p>
+                    <p class="surprise-ending">Happy Birthday, my sister, my princess 👑🤍</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Birthday Wishes Section -->
+    <section class="wishes-section" id="wishes">
+        <div class="container">
+            <h2 class="section-title">Birthday Wishes</h2>
+            <p class="section-subtitle">Share your love and warm wishes with Furqaan</p>
+            <div class="wishes-count" id="wishesCount"></div>
+            
+            <!-- Wish Form -->
+            <div class="wish-form-container">
+                <form id="wishForm" class="wish-form">
+                    <div class="form-group">
+                        <label for="wisherName">Your Name <span class="required">*</span></label>
+                        <input type="text" id="wisherName" name="name" required placeholder="Enter your name">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="wishMessage">Your Message <span class="required">*</span></label>
+                        <textarea id="wishMessage" name="message" required placeholder="Write your birthday wish here..." rows="4"></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="wishImage">Image (Optional)</label>
+                        <div class="file-input-wrapper">
+                            <input type="file" id="wishImage" name="image" accept="image/*">
+                            <label for="wishImage" class="file-input-label">
+                                <span class="file-input-icon">📷</span>
+                                <span class="file-input-text">Choose an image</span>
+                            </label>
+                            <span class="file-name" id="fileName"></span>
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="submit-btn">
+                        <span class="btn-text">Send Wish</span>
+                        <span class="btn-icon">💌</span>
+                    </button>
+                </form>
+            </div>
+            
+            <!-- Wishes Display -->
+            <div class="wishes-container" id="wishesContainer">
+                <p class="no-wishes">No wishes yet. Be the first to send your birthday wishes! 💖</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Video Modal -->
+    <div class="video-modal" id="videoModal">
+        <button class="video-close" aria-label="Close video">&times;</button>
+        <div class="video-modal-content">
+            <video id="modalVideo" controls>
+                <source src="" type="video/mp4">
+            </video>
+        </div>
+    </div>
+
+    <!-- Footer Section -->
+    <footer class="footer-section">
+        <div class="container">
+            <div class="footer-content">
+                <p class="footer-text">Made by <span class="footer-name">Sabirin Mohamed</span></p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
+
